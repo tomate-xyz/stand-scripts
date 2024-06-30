@@ -1,2 +1,4 @@
-# stand-scripts
-My lua Scripts for Stand
+
+# Stand Lua Scripts
+
+My Lua Scripts for Grand Theft Auto Online
