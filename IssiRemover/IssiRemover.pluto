@@ -1,0 +1,9 @@
+util.require_natives("3095a", "g")
+
+menu.my_root():toggle_loop("Remove Issis", {removeIssis}, "Removes Issis from the Streets.", function()
+    for _, veh in pairs(entities.get_all_vehicles_as_handles()) do
+        if IS_VEHICLE_MODEL(veh, util.joaat("issi2")) then
+            entities.delete_by_handle(veh)
+        end
+    end
+end, function() end)
