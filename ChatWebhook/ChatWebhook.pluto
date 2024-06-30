@@ -1,0 +1,81 @@
+local json = require("json")
+local mem_addr = "48 8B D3 48 8D 4C 24 ? 48 69 D2"
+local webhook = ""
+
+-- Functions
+
+local function memScan(name, pattern, callback)
+    local addr = memory.scan(pattern)
+    if addr == 0 then
+        util.log("Failed to find " .. name .. " pattern")
+        found_all = false
+        return
+    end
+    callback(addr)
+    util.log("Found " .. name)
+end
+
+local SCIPtr
+memScan("SCI", mem_addr, function (ptr)
+    SCIPtr = memory.rip(ptr - 0x4)
+end)
+
+local function getSCAuthToken()
+    return memory.read_string(SCIPtr)
+end
+
+local function getSCAvatar(name)
+    local resp = {}
+    local response = false
+    async_http.init("scui.rockstargames.com", "/api/friend/accountsearch", function(output)
+      util.log(output)
+      resp = json.decode(output)
+      response = true
+    end, function() response = false end)
+    async_http.add_header("Authorization", 'SCAUTH val="' .. getSCAuthToken() .. '"')
+    async_http.add_header("X-Requested-With", "XMLHttpRequest")
+    async_http.set_post("application/json", '{"searchNickname":"' .. name .. '"}')
+    async_http.dispatch()
+    repeat 
+      util.yield()
+    until response
+    if resp and resp.Accounts and #resp.Accounts > 0 and resp.Accounts[1].AvatarUrl then
+      return resp.Accounts[1].AvatarUrl
+    else
+      return "https://prod-avatars.akamaized.net/stock-avatars/n/default.png"
+    end
+end
+
+local function send_webhook(msg, playername, divider)
+  local body = [[
+    {
+      "embeds": [
+        {
+          "description": "]] .. "```" .. msg .. "```" .. [[",
+          "timestamp": "]] .. os.date("!%Y-%m-%dT%XZ") .. [[",
+          "color": 16756992,
+          "author": {
+            "name": "]] .. playername .. divider .. [[",
+            "icon_url": "]] .. getSCAvatar(playername) .. [["
+          }
+        }
+      ],
+      "username": "",
+      "avatar_url": ""
+    }
+  ]]
+
+  async_http.init(webhook)
+  async_http.set_post("application/json", body)
+  async_http.dispatch()
+end
+
+-- Event handlers
+
+chat.on_message(function(packet_sender, message_sender, message_text, is_team_chat)
+	local divider = " [ALL]"
+	if is_team_chat then
+		divider = " [TEAM]"
+	end
+	send_webhook(message_text, players.get_name(packet_sender), divider)
+end)
