@@ -10,8 +10,6 @@ menu.my_root():toggle_loop("Chimp ESP", {"chimpesp"}, "Find every Chimp in the w
             local entitypos = entities.get_position(pointer)
             GET_SCREEN_COORD_FROM_WORLD_COORD(entitypos.x, entitypos.y, entitypos.z, screen_alloc_x, screen_alloc_y)
             local screen_x, screen_y = memory.read_float(screen_alloc_x), memory.read_float(screen_alloc_y)
-            
-            util.toast(screen_y)
             directx.draw_text(screen_x, screen_y, "Chimp", 1, 0.6, {r = 1, g = 1, b = 1, a = 1}, false)
         end
     end
