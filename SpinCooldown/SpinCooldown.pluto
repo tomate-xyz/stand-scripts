@@ -1,0 +1,18 @@
+util.require_natives("3095a", "g")
+
+local IntPTR = memory.alloc()
+local success = STAT_GET_INT(util.joaat("MPPLY_LUCKY_WHEEL_USAGE"), IntPTR, -1)
+
+if success then
+    local cooldown1 = memory.read_int(IntPTR)
+    if cooldown1 ~= -1 then
+        local cooldownDate = os.date("%d.%m.%Y %H:%M:%S", cooldown1)
+        
+        util.toast("Lucky Wheel Cooldown POSIX Time: " .. cooldown1)
+        util.toast("Lucky Wheel Cooldown Date: " .. cooldownDate)
+    else
+        util.toast("Failed to retrieve Lucky Wheel Cooldown 1 POSIX Time")
+    end
+else
+    util.toast("Failed to retrieve Lucky Wheel Cooldown 1 (STAT_GET_INT failed)")
+end
