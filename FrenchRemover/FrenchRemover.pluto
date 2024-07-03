@@ -1,0 +1,21 @@
+local function get_ip_data(ip)
+    local data = {country = "unknown"}
+    if util.is_soup_netintel_inited() then
+        local loc = soup.netIntel.getLocationByIp(ip)
+        if loc:isValid() then
+            data.country = soup.getCountryName(loc.country_code, "EN")
+        end
+    end
+    return data
+end
+
+players.on_join(function(pid)
+    local playerIP = players.get_connect_ip(pid)
+    local ipData = get_ip_data(playerIP)
+    local playerName = players.get_name(pid)
+    
+    if ipData.country == "France" then
+        util.toast(playerName .. " is French and will be removed from this session.")
+        menu.trigger_commands("kick " .. playerName)
+    end
+end)
