@@ -15,7 +15,13 @@ players.on_join(function(pid)
     local playerName = players.get_name(pid)
     
     if ipData.country == "France" then
-        util.toast(playerName .. " is French and will be removed from this session.")
-        menu.trigger_commands("kick " .. playerName)
+        while players.exists(pid) do
+            menu.trigger_commands("kick " .. playerName)
+            util.toast(playerName .. " is French and will be removed from this session.")
+            util.yield(15000)
+            if not players.exists(pid) then
+                break
+            end
+        end
     end
 end)
