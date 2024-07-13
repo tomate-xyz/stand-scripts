@@ -1,0 +1,17 @@
+util.require_natives("3095a", "g")
+
+local function random_float()
+    return math.random() * 1000
+end
+
+menu.my_root():toggle_loop("Vehicle Spasm", {"vehspasm"}, "Applies random forces to vehicles around the player.", function()
+for entities.get_all_peds_as_handles() as ped do 
+        if not IS_PED_A_PLAYER(ped) then
+            local veh = GET_VEHICLE_PED_IS_IN(ped, false)
+            if veh ~= 0 then
+                APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(veh, 5, random_float(), random_float(), random_float(), true, false, true, true)
+                util.yield(10)
+            end
+        end
+    end
+end)
